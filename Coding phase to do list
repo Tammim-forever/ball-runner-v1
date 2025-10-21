@@ -1,0 +1,75 @@
+#RNG path [Done]
+#Powerups [In progress]
+#gems [Done]
+#animation [In progress]
+#playermodel [Done]
+#leaderboard [In progress]
+#stages [ 2 asset creation done , 3 in progress , need to implement cloning codes of the main endless mode , adding a goal for stages so it finish]
+
+
+RNG_Path_Generator [Code in C#] : 
+
+using System.Collections.Generic;
+using UnityEngine;
+
+public class RNGPathGenerator : MonoBehaviour
+{
+    public int pathLength = 10;
+    public float stepDistance = 2f;
+    public GameObject pathPointPrefab; 
+
+    private List<Vector3> pathPoints = new List<Vector3>();
+
+    void Start()
+    {
+        GeneratePath();
+        VisualizePath();
+    }
+
+    public List<Vector3> GeneratePath()
+    {
+        pathPoints.Clear();
+        Vector3 currentPosition = transform.position;
+        pathPoints.Add(currentPosition);
+
+        for (int i = 1; i < pathLength; i++)
+        {
+            Vector3 randomDirection = Random.insideUnitCircle.normalized; 
+            Vector3 nextPosition = currentPosition + randomDirection * stepDistance;
+
+            pathPoints.Add(nextPosition);
+            currentPosition = nextPosition; 
+        }
+
+        return pathPoints;
+    }
+
+    private void VisualizePath()
+    {
+        if (pathPointPrefab != null)
+        {
+            foreach (Vector3 point in pathPoints)
+            {
+                Instantiate(pathPointPrefab, point, Quaternion.identity, transform);
+            }
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (pathPoints == null || pathPoints.Count < 2)
+            return;
+
+        Gizmos.color = Color.yellow;
+        for (int i = 0; i < pathPoints.Count - 1; i++)
+        {
+            Gizmos.DrawLine(pathPoints[i], pathPoints[i + 1]);
+        }
+        
+        Gizmos.color = Color.green;
+        Gizmos.DrawSphere(pathPoints[0], 0.2f); 
+        
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(pathPoints[pathPoints.Count - 1], 0.2f); 
+    }
+}
